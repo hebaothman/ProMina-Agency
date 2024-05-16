@@ -240,39 +240,39 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       ],
                     ),
                   ),
-                  BlocBuilder(
-                      builder: (BuildContext context, state) {
-                        if(state is GetImagesLoadingState){
-                          return Constants.circularIndicator(context);
-                        }else if (state is GetImagesLoadedState) {
-                          List images = state.uploadImage.data;
-                          return Padding(
-                            padding: EdgeInsets.only(top: context.height/3,),
-                            child: GridView.builder(
-                              shrinkWrap: true,
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                              gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                              ),
-                              itemCount: images.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25.0),
-                                  ),
-                                  child: Center(child: Image.network(images[index])),
-                                );
-                              },
-                            ),
-                          );
-                        }else if (state is GetImagesErrorState) {
-                          return Constants.errorText(context, state.error.toString());
-                        }
-                        return Container();
-                      }
-                  )
+                  // BlocBuilder(
+                  //     builder: (_, state) {
+                  //       if(state is GetImagesLoadingState){
+                  //         return Constants.circularIndicator(context);
+                  //       }else if (state is GetImagesLoadedState) {
+                  //         List images = state.uploadImage.data;
+                  //         return Padding(
+                  //           padding: EdgeInsets.only(top: context.height/3,),
+                  //           child: GridView.builder(
+                  //             shrinkWrap: true,
+                  //             padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  //             gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+                  //               crossAxisCount: 3,
+                  //               mainAxisSpacing: 10,
+                  //               crossAxisSpacing: 10,
+                  //             ),
+                  //             itemCount: images.length,
+                  //             itemBuilder: (context, index) {
+                  //               return Container(
+                  //                 decoration: BoxDecoration(
+                  //                   borderRadius: BorderRadius.circular(25.0),
+                  //                 ),
+                  //                 child: Center(child: Image.network(images[index])),
+                  //               );
+                  //             },
+                  //           ),
+                  //         );
+                  //       }else if (state is GetImagesErrorState) {
+                  //         return Constants.errorText(context, state.error.toString());
+                  //       }
+                  //       return Container();
+                  //     }
+                  // )
 
                 ],
               )
