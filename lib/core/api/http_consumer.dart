@@ -14,7 +14,7 @@ class HttpConsumer implements ApiConsumer{
   HttpConsumer({required this.client, required this.sharedPreferences});
 
   @override
-  Future get(String path, {Map<String, dynamic>? queryParameters}) async {
+  Future get(String path, String token, {Map<String, dynamic>? queryParameters}) async {
     try {
       final response = await client.get(
         Uri.parse(path),

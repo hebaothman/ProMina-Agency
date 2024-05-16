@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:untitled/core/utils/app_colors.dart';
 import 'package:untitled/core/utils/constants.dart';
 import 'package:untitled/core/utils/media_query_values.dart';
+import 'package:untitled/features/gallery/domain/use_cases/get_images.dart';
 import 'package:untitled/features/gallery/domain/use_cases/upload.dart';
 import 'package:untitled/features/gallery/presentation/cubit/upload_cubit.dart';
 import 'package:untitled/features/login/domain/entities/userToken.dart';
@@ -21,6 +22,14 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   var _imageFile;
+  
+  @override
+  void initState(){
+    BlocProvider.of<UploadCubit>(context).getImages(
+      TokenParams(token: widget.userToken.token,)
+    );
+    super.initState();
+  }
 
   Widget _galleryButton() {
     return GestureDetector(
@@ -231,28 +240,40 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(top: context.height/3,),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                      ),
-                      itemCount: 100,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25.0),
-                            color: (index % 2 == 0) ? Colors.green : Colors.yellow,
-                          ),
-                          child: Center(child: Text('$index')),
-                        );
-                      },
-                    ),
-                  ),
+                  BlocBuilder(
+                      builder: (BuildContext context, state) {
+                        if(state is GetImagesLoadingState){
+                          return Constants.circularIndicator(context);
+                        }else if (state is GetImagesLoadedState) {
+                          List images = state.uploadImage.data;
+                          return Padding(
+                            padding: EdgeInsets.only(top: context.height/3,),
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                              gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                              ),
+                              itemCount: images.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(25.0),
+                                  ),
+                                  child: Center(child: Image.network(images[index])),
+                                );
+                              },
+                            ),
+                          );
+                        }else if (state is GetImagesErrorState) {
+                          return Constants.errorText(context, state.error.toString());
+                        }
+                        return Container();
+                      }
+                  )
+
                 ],
               )
             ),

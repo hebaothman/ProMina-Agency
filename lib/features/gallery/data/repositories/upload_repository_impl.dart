@@ -5,6 +5,7 @@ import 'package:untitled/core/network/network_info.dart';
 import 'package:untitled/features/gallery/data/data_sources/upload_remote_data_source.dart';
 import 'package:untitled/features/gallery/domain/entities/upload.dart';
 import 'package:untitled/features/gallery/domain/repositories/upload_repository.dart';
+import 'package:untitled/features/gallery/domain/use_cases/get_images.dart';
 import 'package:untitled/features/gallery/domain/use_cases/upload.dart';
 
 class UploadRepositoryImpl implements UploadRepository {
@@ -18,6 +19,16 @@ class UploadRepositoryImpl implements UploadRepository {
     try {
       final upload = await uploadRemoteDataSource.upload(params);
       return Right(upload);
+    } on ServerException catch(error){
+      return Left(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UploadImage>> getImages(TokenParams params) async {
+    try {
+      final getImages = await uploadRemoteDataSource.getImages(params);
+      return Right(getImages);
     } on ServerException catch(error){
       return Left(ServerFailure(error.toString()));
     }

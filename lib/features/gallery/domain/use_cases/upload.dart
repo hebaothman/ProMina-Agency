@@ -22,5 +22,5 @@ class TokenImageParams extends Equatable{
   TokenImageParams({required this.token, required this.imagePath, required this.imageName});
   
   @override
-  List<Object?> get props => [token];
+  List<Object?> get props => [token, imagePath, imageName];
 }
