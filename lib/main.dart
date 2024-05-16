@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:untitled/config/routes/app_routes.dart';
+import 'package:untitled/features/gallery/upload_injection_container.dart';
 import 'package:untitled/features/login/login_injection_container.dart';
 import 'package:untitled/features/login/presentation/cubit/login_cubit.dart';
 import 'package:untitled/injection_container.dart';
@@ -11,6 +12,7 @@ final sl = GetIt.instance;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await loginDependencyInjectionInit();
+  await uploadDependencyInjectionInit();
   await dependencyInjectionInit();//For initializing network info and shared preferences
   runApp(
     BlocProvider<LoginCubit>(

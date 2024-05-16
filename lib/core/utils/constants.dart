@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_device_type/flutter_device_type.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:untitled/core/utils/app_colors.dart';
 
 class Constants{
@@ -155,4 +156,66 @@ class Constants{
   }
   static void showLoadingDialog(BuildContext context, {Key? key}) => showDialog<void>(context: context, useRootNavigator: false, barrierDismissible: false, builder: (_) => loadingDialog(context),).then((_) => FocusScope.of(context).requestFocus(FocusNode()));
   static void hideLoadingDialog(BuildContext context) => Navigator.pop(context);
+
+
+  //Camera Gallery Picker
+  var data;
+  var _imagePicker;
+  Future<dynamic> onImageButtonPressed(ImageSource source) async {
+    _imagePicker = ImagePicker();
+    try {
+      XFile _image = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 200.0,
+        maxHeight: 200.0,
+        imageQuality: 40,
+      );
+      data = _image;
+    } catch (e) {
+      data = e;
+    }
+    //Check if there's android
+    if(Device.get().isAndroid) {
+      FutureBuilder<void>(
+        future: _retrieveLostData(),
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              data = "You didn't pick an image";
+              return data;
+            case ConnectionState.done:
+              return data;
+            default:
+              if (snapshot.hasError) {
+                data = "Pick image: ${snapshot.error}}";
+                return data;
+              } else {
+                data = "You didn't pick an image";
+                return data;
+              }
+          }
+        },
+      );
+      return data;
+    }else {
+      return data;
+    }
+  }
+  /*
+  Android system -- although very rarely -- sometimes kills the MainActivity after the image_picker finishes.
+  When this happens, we lost the data selected from the image_picker.
+  You can use retrieveLostData to retrieve the lost data in this situation
+  */
+  Future<dynamic> _retrieveLostData() async {
+    final LostDataResponse response = await _imagePicker.retrieveLostData();
+    if (response.isEmpty) {
+      return '';
+    }
+    if (response.file != null) {
+      data = response.file;
+    } else {
+      return response.exception!.code;
+    }
+  }
 }

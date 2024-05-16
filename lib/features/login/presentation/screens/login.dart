@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_device_type/flutter_device_type.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:untitled/config/routes/app_routes.dart';
 import 'package:untitled/core/utils/app_colors.dart';
 import 'package:untitled/core/utils/constants.dart';
 import 'package:untitled/core/utils/media_query_values.dart';
+import 'package:untitled/features/gallery/presentation/screens/gallery.dart';
+import 'package:untitled/features/login/domain/entities/userToken.dart';
 import 'package:untitled/features/login/domain/use_cases/login.dart';
 import 'package:untitled/features/login/presentation/cubit/login_cubit.dart';
 import 'package:untitled/features/login/presentation/widgets/email.dart';
@@ -29,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Constants.showLoadingDialog(context);
         }else if (state is LoginLoadedState){
           Constants.hideLoadingDialog(context);
-          // Navigator.pushReplacementNamed(context, Routes.applicantHomeRoute);
+          Navigator.pushReplacementNamed(context, Routes.galleryRoute, arguments: UserNameArguments(userToken: state.userToken));
         }else if (state is LoginErrorState) {
           Constants.hideLoadingDialog(context);
           Constants.showDefaultSnackBar(context: context, text: state.error.toString());
@@ -134,7 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         top: false,
-        // bottom: false,
         child: Center(
           child: Container(
             constraints: const BoxConstraints.expand(),

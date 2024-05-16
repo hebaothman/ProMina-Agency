@@ -15,4 +15,5 @@ class AppColors{
   static Color warningColor = HexColor('#FFFF00');
   static Color greenColor = Colors.green;
   static Color yellowColor = Colors.yellow;
+  static Color purpleColor = HexColor('#efd8f9');
 }

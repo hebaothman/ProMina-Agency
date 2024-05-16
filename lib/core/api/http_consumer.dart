@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:untitled/core/api/api_consumer.dart';
 import 'package:untitled/core/api/status_code.dart';
 import 'package:untitled/core/error/exceptions.dart';
 import 'package:untitled/core/utils/app_strings.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class HttpConsumer implements ApiConsumer{
   final http.Client client;
@@ -18,7 +18,6 @@ class HttpConsumer implements ApiConsumer{
     try {
       final response = await client.get(
         Uri.parse(path),
-        headers: await _getToken()
       );
       return _handleResponseErrors(response);
     }on TimeoutException catch(error){
@@ -34,7 +33,7 @@ class HttpConsumer implements ApiConsumer{
       final response = await client.post(
         Uri.parse(path),
         body: body,
-        headers: await _getToken()
+        headers: _getToken(body)
       );
       return _handleResponseErrors(response);
     }on TimeoutException catch(error){
@@ -44,9 +43,43 @@ class HttpConsumer implements ApiConsumer{
     }
   }
 
+  Future uploadMultiPart(String path, String imagePath, String token) async {
+    try {
+      var results = http.MultipartRequest('POST', Uri.parse(path), );
+      //create multipart using filepath, string or bytes
+      var pic = await http.MultipartFile.fromPath('img', imagePath);
+      //add multipart to request
+      results.files.add(pic);
+      Map<String, String> _headers = {AppStrings.contentType: AppStrings.applicationJson, AppStrings.charset: AppStrings.utf, AppStrings.authorization: "Bearer "+ token};
+      results.headers.addAll(_headers);
+      var response = await results.send();
+      //Handling Errors
+      final String respStr = await response.stream.bytesToString();
+      switch (response.statusCode){
+        case StatusCode.ok:
+          return jsonDecode(respStr);
+        case StatusCode.badRequest:
+          throw BadRequestException(jsonDecode(respStr)['message']);
+        case StatusCode.unauthorized:
+        case StatusCode.forbidden:
+          throw UnauthorizedException(jsonDecode(respStr)['message']);
+        case StatusCode.notFound:
+          throw NotFoundException(jsonDecode(respStr)['message']);
+        case StatusCode.conflict:
+          throw ConflictException(jsonDecode(respStr)['message']);
+        case StatusCode.internalServerError:
+          throw InternalServerErrorException(jsonDecode(respStr)['message']);
+      }
+    }on TimeoutException catch(error){
+      throw FetchDataException(error.toString());
+    }on Exception catch(error){
+      throw NoInternetConnectionException(error.toString());
+    }
+  }
+
   dynamic _handleResponseErrors(http.Response response) {
     String _message = '';
-    if(response.statusCode != StatusCode.ok) {
+    if(response.statusCode != StatusCode.ok && response.body != "") {
       _message = (jsonDecode(response.body)['Message']).toString();
     }
     switch (response.statusCode){
@@ -66,8 +99,7 @@ class HttpConsumer implements ApiConsumer{
     }
   }
 
-  Future<dynamic> _getToken() async {
-    var token = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YTA0YWNmOGY5YWExNWVjZTgxNTFkNjI1MjgzNDQ2NCIsInN1YiI6IjY1ODU3Y2Y1NDNjZDU0NTUyYTNjMDg3MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.jGgMWMKm5Q0xdfY9-5JO7QYAm5cKiGyIPTpguRpXYtE';
+  dynamic _getToken(String token) {
     return {AppStrings.contentType: AppStrings.applicationJson, AppStrings.charset: AppStrings.utf, AppStrings.authorization: token};
   }
 
